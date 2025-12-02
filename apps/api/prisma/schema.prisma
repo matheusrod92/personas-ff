@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model FeatureFlag {
+  id          Int          @id @default(autoincrement())
+  key         String       @unique
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  personaFlags PersonaFlag[]
+}
+
+model Persona {
+  id        Int       @id @default(autoincrement())
+  name      String
+  country   String?
+  age       Int?
+  premium   Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  personaFlags PersonaFlag[]
+}
+
+model PersonaFlag {
+  id        Int       @id @default(autoincrement())
+  personaId Int
+  flagId    Int
+  variant   String    @default("on")
+
+  persona   Persona      @relation(fields: [personaId], references: [id])
+  flag      FeatureFlag  @relation(fields: [flagId], references: [id])
+
+  @@unique([personaId, flagId])
+}
